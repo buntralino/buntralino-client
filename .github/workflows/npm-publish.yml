@@ -5,7 +5,7 @@ name: Npm Package
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   publish-npm:
