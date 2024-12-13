@@ -1,5 +1,4 @@
-# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
-# For more information see: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages
+# This workflow will build the bun package and post an NPM release if package.json is updated.
 
 name: Npm Package
 
@@ -19,6 +18,7 @@ jobs:
           node-version: 22
           registry-url: https://registry.npmjs.org/
       - run: bun install
+      - run: bun build.ts
       - name: NPM Publish
         uses: JS-DevTools/npm-publish@v3.1.1
         with:
