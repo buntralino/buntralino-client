@@ -60,6 +60,8 @@ const readyPromise = new Promise<void>((resolve, reject) => {
             console.error('⚛️ Buntralino failed with', error);
         }
     });
+    // Initialize Neutralino just in case the app developer didn't do it themselves
+    Neutralino.init();
 })();
 
 /**
