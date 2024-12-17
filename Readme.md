@@ -16,7 +16,7 @@ bun install --save buntralino-client # or use your package manager of choice
 import * as buntralino from 'buntralino-client'; // Automatically connects to Bun!
 
 // Wait till the connection to Bun is up
-await buntralino.ready();
+await buntralino.ready;
 
 // Call a method added on Bun side with buntralino.registerMethod
 const updates = await buntralino.run('loadUpdates');
