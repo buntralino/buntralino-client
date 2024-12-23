@@ -10,9 +10,43 @@ const readyPromise = new Promise<void>((resolve, reject) => {
     readyReject = reject;
 });
 
+let bunCheckEnabled = true;
+export const disableBunCheck = () => {
+    bunCheckEnabled = false;
+};
+
 (async () => {
     const Neutralino = window.Neutralino ?? await import('@neutralinojs/lib');
-    Neutralino.events.on('ready', () => {
+    Neutralino.events.on('ready', async () => {
+        // Firstly check that this window was opened with Buntralino
+        if (bunCheckEnabled &&
+            window.NL_RESMODE === 'bundle' &&
+            !window.NL_ARGS.some(a => a.startsWith('--buntralino-name='))
+        ) {
+            // Open the actual Buntralino app and exit
+            const config = await Neutralino.app.getConfig();
+            let execPath = `${window.NL_CWD}/${config.cli.binaryName}`;
+            if (window.NL_OS === 'Windows') {
+                execPath += '.exe';
+            }
+            try {
+                // Check if the file exists
+                Neutralino.filesystem.getStats(execPath);
+                // Run the proper executable and detach it
+                await Neutralino.os.execCommand(`"${execPath}"`, {
+                    background: true,
+                    cwd: window.NL_CWD
+                });
+                Neutralino.app.exit();
+            } catch (error) {
+                window.alert('"neutralino" is not the main executable! Please run the other one.');
+                Neutralino.app.exit();
+            } finally {
+                return;
+            }
+        }
+
+        // Try connecting to Buntralino
         try {
             const match1 = window.NL_ARGS.find(a => a.startsWith('--buntralino-port=')),
                   match2 = window.NL_ARGS.find(a => a.startsWith('--buntralino-name='));
