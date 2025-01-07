@@ -56,7 +56,7 @@ export const disableBunCheck = () => {
             const [, port] = match1.split('=');
             const [, name] = match2.split('=');
             const neuToken = window.NL_TOKEN || sessionStorage.NL_TOKEN;
-            bunWs = new WebSocket(`ws://localhost:${port}`);
+            bunWs = new WebSocket(`ws://127.0.0.1:${port}`);
             bunWs.onopen = () => {
                 // eslint-disable-next-line no-console
                 console.debug('⚛️ Announcing ourself to Buntralino…');
@@ -80,7 +80,7 @@ export const disableBunCheck = () => {
                 }
                 bunToken = payload.detail.token;
                 bunPort = payload.detail.port;
-                bunWs = new WebSocket(`ws://localhost:${bunPort}`);
+                bunWs = new WebSocket(`ws://127.0.0.1:${bunPort}`);
                 bunWs.onopen = () => {
                     listeners(bunToken, bunWs);
                     // eslint-disable-next-line no-console
