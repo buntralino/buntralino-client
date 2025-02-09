@@ -16,7 +16,7 @@ export const disableBunCheck = () => {
 };
 
 (async () => {
-    const Neutralino = window.Neutralino ?? await import('@neutralinojs/lib');
+    const Neutralino = window.Neutralino ?? (await import('@neutralinojs/lib')).default;
     Neutralino.events.on('ready', async () => {
         // Firstly check that this window was opened with Buntralino
         if (bunCheckEnabled &&
