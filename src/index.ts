@@ -1,6 +1,10 @@
 import listeners from './listeners';
-
 const getUid = () => Date.now().toString(36) + Math.random().toString(36);
+
+let neutralino: Awaited<typeof import('@neutralinojs/lib')>;
+if (window.Neutralino) {
+    neutralino = window.Neutralino;
+}
 
 let bunToken: string, bunPort: number, bunWs: WebSocket;
 let readyResolve: (value: void | PromiseLike<void>) => void,
@@ -16,31 +20,33 @@ export const disableBunCheck = () => {
 };
 
 (async () => {
-    const Neutralino = window.Neutralino ?? (await import('@neutralinojs/lib')).default;
-    Neutralino.events.on('ready', async () => {
+    if (!neutralino!) {
+        neutralino = (await import('@neutralinojs/lib')).default;
+    }
+    neutralino.events.on('ready', async () => {
         // Firstly check that this window was opened with Buntralino
         if (bunCheckEnabled &&
             window.NL_RESMODE === 'bundle' &&
             !window.NL_ARGS.some(a => a.startsWith('--buntralino-name='))
         ) {
             // Open the actual Buntralino app and exit
-            const config = await Neutralino.app.getConfig();
+            const config = await neutralino.app.getConfig();
             let execPath = `${window.NL_CWD}/${config.cli.binaryName}`;
             if (window.NL_OS === 'Windows') {
                 execPath += '.exe';
             }
             try {
                 // Check if the file exists
-                Neutralino.filesystem.getStats(execPath);
+                neutralino.filesystem.getStats(execPath);
                 // Run the proper executable and detach it
-                await Neutralino.os.execCommand(`"${execPath}"`, {
+                await neutralino.os.execCommand(`"${execPath}"`, {
                     background: true,
                     cwd: window.NL_CWD
                 });
-                Neutralino.app.exit();
+                neutralino.app.exit();
             } catch (error) {
                 window.alert('"neutralino" is not the main executable! Please run the other one.');
-                Neutralino.app.exit();
+                neutralino.app.exit();
             } finally {
                 return;
             }
@@ -74,7 +80,7 @@ export const disableBunCheck = () => {
                     port: number
                 }
             }) => {
-                Neutralino.events.off('buntralinoRegisterParent', listener);
+                neutralino.events.off('buntralinoRegisterParent', listener);
                 if (!payload.detail.token || !payload.detail.port) {
                     return;
                 }
@@ -82,20 +88,20 @@ export const disableBunCheck = () => {
                 bunPort = payload.detail.port;
                 bunWs = new WebSocket(`ws://127.0.0.1:${bunPort}`);
                 bunWs.onopen = () => {
-                    listeners(Neutralino, bunToken, bunWs);
+                    listeners(neutralino, bunToken, bunWs);
                     // eslint-disable-next-line no-console
                     console.log('⚛️🥟 Buntralino connected on port', bunPort);
                     readyResolve();
                 };
             };
-            Neutralino.events.on('buntralinoRegisterParent', listener);
+            neutralino.events.on('buntralinoRegisterParent', listener);
         } catch (error) {
             readyReject(error);
             console.error('⚛️ Buntralino failed with', error);
         }
     });
     // Initialize Neutralino just in case the app developer didn't do it themselves
-    Neutralino.init();
+    neutralino.init();
 })();
 
 /**
@@ -130,7 +136,7 @@ export const run = async (methodName: string, payload?: unknown): Promise<unknow
         }>) => {
             const {id, returnValue, error, stack} = event.detail;
             if (id === awaitedResponseId) {
-                Neutralino.events.off('buntralinoExecResult', listener);
+                neutralino.events.off('buntralinoExecResult', listener);
                 if ('error' in event.detail) {
                     reject(new Error(error ?? 'Unknown error', {
                         cause: stack ? new Error(stack) : null
@@ -139,7 +145,7 @@ export const run = async (methodName: string, payload?: unknown): Promise<unknow
                 resolve(returnValue);
             }
         };
-        Neutralino.events.on('buntralinoExecResult', listener);
+        neutralino.events.on('buntralinoExecResult', listener);
     });
 };
 

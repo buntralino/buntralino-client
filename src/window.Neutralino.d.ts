@@ -1,3 +1,3 @@
 declare interface Window {
-    Neutralino: Awaited<typeof import('@neutralinojs/lib')>
+    Neutralino: Awaited<typeof import('@neutralinojs/lib')> | undefined;
 }
