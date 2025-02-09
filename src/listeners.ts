@@ -28,18 +28,22 @@ const evalHandler = async (payload: {
     }
 };
 
-export default (token: string, ws: WebSocket) => {
+export default async (
+    neutralino: Awaited<typeof import('@neutralinojs/lib')>,
+    token: string,
+    ws: WebSocket
+) => {
     bunWs = ws;
     bunToken = token;
-    Neutralino.events.on('buntralinoEval', evalHandler);
-    Neutralino.events.on('buntralinoNavigate', (event: {
+    neutralino.events.on('buntralinoEval', evalHandler);
+    neutralino.events.on('buntralinoNavigate', (event: {
         detail: {
             url: string
         }
     }) => {
         window.location.href = event.detail.url;
     });
-    Neutralino.events.on('buntralinoReload', () => {
+    neutralino.events.on('buntralinoReload', () => {
         window.location.reload();
     });
 };

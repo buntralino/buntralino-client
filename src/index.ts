@@ -82,7 +82,7 @@ export const disableBunCheck = () => {
                 bunPort = payload.detail.port;
                 bunWs = new WebSocket(`ws://127.0.0.1:${bunPort}`);
                 bunWs.onopen = () => {
-                    listeners(bunToken, bunWs);
+                    listeners(Neutralino, bunToken, bunWs);
                     // eslint-disable-next-line no-console
                     console.log('⚛️🥟 Buntralino connected on port', bunPort);
                     readyResolve();
